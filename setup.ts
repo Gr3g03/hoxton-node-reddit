@@ -28,6 +28,12 @@ const users = [
         user_password: 12345
     }
 ]
+
+const logins = [{
+    userId: 1,
+    username: 'testtest',
+    status: 'online'
+}]
 const posts = [
     {
         post_title: 'text',
@@ -73,6 +79,7 @@ DROP TABLE IF EXISTS userSubreddits;
 DROP TABLE IF EXISTS subbredits;
 DROP TABLE IF EXISTS comments;
 DROP TABLE IF EXISTS posts;
+DROP TABLE IF EXISTS logins;
 DROP TABLE IF EXISTS users;
 
 
@@ -84,6 +91,14 @@ CREATE TABLE IF NOT EXISTS users (
     user_age TEXT NOT NULL,
     user_password INTEGER NOT NULL
   );
+
+  CREATE TABLE IF NOT EXISTS logins (
+    id INTEGER PRIMARY KEY,
+    userId INTEGER NOT NULL,
+    username TEXT NOT NULL,
+    status text NOT NULL,
+    FOREIGN KEY (userId) REFERENCES users(id)
+    );
   
   CREATE TABLE IF NOT EXISTS posts (
     id INTEGER PRIMARY KEY,
@@ -137,6 +152,10 @@ INSERT INTO users(user_name, user_lastname, user_email, user_age ,user_password)
 VALUES (?,?,?,?,?);
 `)
 
+const createLogins = db.prepare(`
+INSERT INTO logins(userId ,username ,status ) VALUES(?, ?, ?)
+`)
+
 const createPosts = db.prepare(`
 INSERT INTO posts(post_title, post_img, post_content, post_upvotes, post_downvotes, postId)
 VALUES(?,?,?,?,?,?);
@@ -155,7 +174,6 @@ INSERT INTO userSubreddits(subreddit_name, userId, subbreditId)
 VALUES (?,?,?);
 `)
 
-
 const createNotifications = db.prepare(`
 INSERT INTO notifications(not_status , userId)
 VALUES(?,?);
@@ -164,6 +182,10 @@ VALUES(?,?);
 
 for (const user of users) {
     createUsers.run(user.user_name, user.user_lastname, user.user_email, user.user_age, user.user_password)
+}
+
+for (const login of logins) {
+    createLogins.run(login.userId, login.username, login.username)
 }
 
 for (const post of posts) {
