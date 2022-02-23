@@ -48,10 +48,15 @@ const comments = [
     }
 ]
 
+const subbredits = [{
+    name: 'subbredit name'
+}]
+
 const userSubreddits = [
     {
         userId: 1,
-        subreddit_name: 'text'
+        subreddit_name: 'text',
+        subbreditId: 1
     }
 ]
 
@@ -59,11 +64,13 @@ const notifications = [
     {
         not_status: 'yes',
         userId: 1
-    }]
+    }
+]
 
 db.exec(`
 DROP TABLE IF EXISTS notifications;
 DROP TABLE IF EXISTS userSubreddits;
+DROP TABLE IF EXISTS subbredits;
 DROP TABLE IF EXISTS comments;
 DROP TABLE IF EXISTS posts;
 DROP TABLE IF EXISTS users;
@@ -71,46 +78,53 @@ DROP TABLE IF EXISTS users;
 
 CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY,
-    user_name TEXT,
-    user_lastname TEXT,
-    user_email TEXT,
-    user_age TEXT,
-    user_password INTEGER
+    user_name TEXT NOT NULL,
+    user_lastname TEXT NOT NULL,
+    user_email TEXT NOT NULL,
+    user_age TEXT NOT NULL,
+    user_password INTEGER NOT NULL
   );
   
   CREATE TABLE IF NOT EXISTS posts (
     id INTEGER PRIMARY KEY,
-    post_title TEXT,
-    post_img TEXT,
-    post_content TEXT,
-    post_upvotes INTEGER,
-    post_downvotes INTEGER,
-    postId INTEGER,
+    post_title TEXT NOT NULL,
+    post_img TEXT NOT NULL,
+    post_content TEXT NOT NULL,
+    post_upvotes INTEGER NOT NULL,
+    post_downvotes INTEGER NOT NULL,
+    postId INTEGER NOT NULL,
     FOREIGN KEY (postId) REFERENCES users(id)
   );
 
   CREATE TABLE IF NOT EXISTS notifications (
-    id INTEGER PRIMARY KEY,
-    not_status BOOLEAN,
-    userId INTEGER,
+    id INTEGER PRIMARY KEY ,
+    not_status BOOLEAN NOT NULL,
+    userId INTEGER NOT NULL,
     FOREIGN KEY (userId) REFERENCES users(id)
+  );
+
+  CREATE TABLE IF NOT EXISTS subbredits (
+    id INTEGER PRIMARY KEY,
+    name TEXT NOT NULL
   );
   
   
   CREATE TABLE IF NOT EXISTS userSubreddits (
     id INTEGER PRIMARY KEY,
-    userId INTEGER,
-    subreddit_name TEXT,
-    FOREIGN KEY (userId) REFERENCES users(id)
+    userId INTEGER NOT NULL,
+    subbreditId INTEGER NOT NULL,
+    subreddit_name TEXT NOT NULL,
+    FOREIGN KEY (userId) REFERENCES users(id),
+    FOREIGN KEY (subbreditId) REFERENCES subbredits(id)
   );
 
   CREATE TABLE IF NOT EXISTS comments (
     id INTEGER PRIMARY KEY,
-    content TEXT,
-    upvotes INTEGER,
-    downvotes INTEGER,
-    userId INTEGER,
-    postId INTEGER,
+    content TEXT NOT NULL,
+    upvotes INTEGER NOT NULL,
+    downvotes INTEGER NOT NULL,
+    userId INTEGER NOT NULL,
+    postId INTEGER NOT NULL,
     FOREIGN KEY (userId) REFERENCES users(id),
     FOREIGN KEY (postId) REFERENCES posts(id)
   );
@@ -133,9 +147,12 @@ INSERT INTO comments(  content, upvotes, downvotes, userId, postId)
 VALUES(?,?,?,?,?);
 `)
 
+const createSubbredits = db.prepare(`
+INSERT INTO subbredits(name) VALUES(?);`)
+
 const createUserSubbredits = db.prepare(`
-INSERT INTO userSubreddits(subreddit_name, userId)
-VALUES (?,?);
+INSERT INTO userSubreddits(subreddit_name, userId, subbreditId)
+VALUES (?,?,?);
 `)
 
 
@@ -156,9 +173,12 @@ for (const post of posts) {
 for (const comment of comments) {
     createComents.run(comment.content, comment.upvotes, comment.downvotes, comment.userId, comment.postId)
 }
+for (const subbredit of subbredits) {
+    createSubbredits.run(subbredit.name)
+}
 
-for (const subbredit of userSubreddits) {
-    createUserSubbredits.run(subbredit.subreddit_name, subbredit.userId)
+for (const userSubbredit of userSubreddits) {
+    createUserSubbredits.run(userSubbredit.subreddit_name, userSubbredit.userId, userSubbredit.subbreditId)
 }
 
 for (const notification of notifications) {
