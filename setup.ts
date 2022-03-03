@@ -84,62 +84,69 @@ DROP TABLE IF EXISTS users;
 
 
 CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY,
+    id INTEGER ,
     user_name TEXT NOT NULL,
     user_lastname TEXT NOT NULL,
     user_email TEXT NOT NULL,
     user_age TEXT NOT NULL,
-    user_password INTEGER NOT NULL
+    user_password INTEGER NOT NULL,
+    PRIMARY KEY (id)
   );
 
   CREATE TABLE IF NOT EXISTS logins (
-    id INTEGER PRIMARY KEY,
+    id INTEGER,
     userId INTEGER NOT NULL,
     username TEXT NOT NULL,
     status text NOT NULL,
+    PRIMARY KEY (id),
     FOREIGN KEY (userId) REFERENCES users(id)
     );
   
   CREATE TABLE IF NOT EXISTS posts (
-    id INTEGER PRIMARY KEY,
+    id INTEGER,
     post_title TEXT NOT NULL,
     post_img TEXT NOT NULL,
     post_content TEXT NOT NULL,
     post_upvotes INTEGER NOT NULL,
     post_downvotes INTEGER NOT NULL,
     postId INTEGER NOT NULL,
+    PRIMARY KEY (id),
     FOREIGN KEY (postId) REFERENCES users(id)
   );
 
   CREATE TABLE IF NOT EXISTS notifications (
-    id INTEGER PRIMARY KEY ,
+    id INTEGER ,
     not_status BOOLEAN NOT NULL,
     userId INTEGER NOT NULL,
+    PRIMARY KEY (id),
     FOREIGN KEY (userId) REFERENCES users(id)
   );
 
   CREATE TABLE IF NOT EXISTS subbredits (
-    id INTEGER PRIMARY KEY,
-    name TEXT NOT NULL
+    id INTEGER,
+    name TEXT NOT NULL,
+    PRIMARY KEY (id)
   );
   
   
   CREATE TABLE IF NOT EXISTS userSubreddits (
-    id INTEGER PRIMARY KEY,
+    id INTEGER,
     userId INTEGER NOT NULL,
     subbreditId INTEGER NOT NULL,
     subreddit_name TEXT NOT NULL,
+    PRIMARY KEY (id),
     FOREIGN KEY (userId) REFERENCES users(id),
     FOREIGN KEY (subbreditId) REFERENCES subbredits(id)
   );
 
   CREATE TABLE IF NOT EXISTS comments (
-    id INTEGER PRIMARY KEY,
+    id INTEGER,
     content TEXT NOT NULL,
     upvotes INTEGER NOT NULL,
     downvotes INTEGER NOT NULL,
     userId INTEGER NOT NULL,
     postId INTEGER NOT NULL,
+    PRIMARY KEY (id),
     FOREIGN KEY (userId) REFERENCES users(id),
     FOREIGN KEY (postId) REFERENCES posts(id)
   );
