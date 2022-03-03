@@ -10,21 +10,21 @@ const users = [
         user_name: 'text',
         user_lastname: 'text',
         user_email: 'text',
-        user_age: 'text',
+        user_age: 5,
         user_password: 12345
     },
     {
         user_name: 'text1',
         user_lastname: 'text1',
         user_email: 'text1',
-        user_age: 'text1',
+        user_age: 20,
         user_password: 12345
     },
     {
         user_name: 'text2',
         user_lastname: 'text2',
         user_email: 'text2',
-        user_age: 'text2',
+        user_age: 30,
         user_password: 12345
     }
 ]
@@ -88,7 +88,7 @@ CREATE TABLE IF NOT EXISTS users (
     user_name TEXT NOT NULL,
     user_lastname TEXT NOT NULL,
     user_email TEXT NOT NULL,
-    user_age TEXT NOT NULL,
+    user_age INTEGER NOT NULL,
     user_password INTEGER NOT NULL,
     PRIMARY KEY (id)
   );

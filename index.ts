@@ -84,6 +84,25 @@ const delteComment = db.prepare(`
  DELETE FROM comments WHERE id=?;
 `)
 
+const joinUserandsubbredits = db.prepare(`
+SELECT userSubreddits.*, subbreditId, userId, subreddit_name FROM userSubreddits
+JOIN users ON userSubreddits.userId = users.id
+WHERE users.id = 1;
+`)
+
+const createUsers = db.prepare(`
+INSERT INTO users(user_name, user_lastname, user_email, user_age ,user_password)
+VALUES (?,?,?,?,?);
+`)
+
+const createPosts = db.prepare(`
+INSERT INTO posts(post_title, post_img, post_content, post_upvotes, post_downvotes, postId)
+VALUES(?,?,?,?,?,?);
+`)
+
+const updateUser = db.prepare(`
+UPDATE users  SET user_name =?, user_lastname=?, user_email=?, user_age=?, user_password=? WHERE id =?;
+`)
 
 app.get('/users', (req, res) => {
     const info = getAllusers.all()
@@ -178,10 +197,51 @@ app.get('/logins', (req, res) => {
 
 
 
-app.post('/users', (req, res) => { })
-app.post('/comments', (req, res) => { })
+app.post('/users', (req, res) => {
+    //get the data from body
+    const { user_name, user_lastname, user_email, user_age, user_password } = req.body
 
-app.patch('/users/:id', (req, res) => { })
+    //create the data
+    const info = createUsers.run(user_name, user_lastname, user_email, user_age, user_password)
+
+    //update DB
+    const newUser = getuserByID.get(info.lastInsertRowid)
+
+    res.send(newUser)
+})
+app.post('/posts', (req, res) => {
+    //get data to change from body
+    const { post_title, post_img, post_content, post_upvotes, post_downvotes, postId } = req.body
+
+    //create the data
+    const info = createPosts.run(post_title, post_img, post_content, post_upvotes, post_downvotes, postId)
+
+    const newPost = getpostByID.get(info.lastInsertRowid)
+
+    res.send(newPost)
+
+})
+
+app.patch('/users/:id', (req, res) => {
+    //get ID from params
+    const id = req.params.id
+    //data to be change
+    const { user_name, user_lastname, user_email, user_age, user_password } = req.body
+
+
+    const user = getuserByID.get(id)
+
+    if (user) {
+        updateUser.run(user_name ?? user.user_name, user_lastname ?? user_lastname, user_email ?? user_email, user_age ?? user_age, user_password ?? user_password, id)
+
+        const updatedUser = getuserByID.get(id)
+        res.send(updatedUser)
+    } else {
+        res.status(404).send({ error: 'not found' })
+    }
+
+
+})
 app.patch('/comments/:id', (req, res) => { })
 
 
