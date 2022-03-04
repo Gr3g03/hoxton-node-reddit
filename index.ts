@@ -100,8 +100,21 @@ INSERT INTO posts(post_title, post_img, post_content, post_upvotes, post_downvot
 VALUES(?,?,?,?,?,?);
 `)
 
+const createComents = db.prepare(`
+INSERT INTO comments(  content, upvotes, downvotes, userId, postId)
+VALUES(?,?,?,?,?);
+`)
+
+const updateComents = db.prepare(`
+UPDATE comments SET content=?, upvotes=?, downvotes=?, userId=?, postId=?;
+`)
+
 const updateUser = db.prepare(`
 UPDATE users  SET user_name =?, user_lastname=?, user_email=?, user_age=?, user_password=? WHERE id =?;
+`)
+
+const updatePosts = db.prepare(`
+UPDATE  posts SET post_title =?, post_img=?, post_content=?, post_upvotes=?, post_downvotes=?, postId=?;
 `)
 
 app.get('/users', (req, res) => {
@@ -197,6 +210,7 @@ app.get('/logins', (req, res) => {
 
 
 
+
 app.post('/users', (req, res) => {
     //get the data from body
     const { user_name, user_lastname, user_email, user_age, user_password } = req.body
@@ -242,8 +256,45 @@ app.patch('/users/:id', (req, res) => {
 
 
 })
-app.patch('/comments/:id', (req, res) => { })
 
+app.patch('/comments/:id', (req, res) => {
+    const id = req.params.id
+
+    const { content, upvotes, downvotes, userId, postId } = req.body
+
+    const comment = getcommentById.get(id)
+
+    if (comment) {
+
+        updateComents.run(content ?? comment.content, upvotes ?? comment.upvotes, downvotes ?? comment.downvotes, userId ?? comment.userId, postId ?? comment.postId)
+
+        const result = getcommentById.get(id)
+
+        res.send(result)
+    } else {
+        res.status(404).send({ error: 'comment not fund' })
+    }
+})
+
+app.patch('/posts/:id', (req, res) => {
+    const id = req.params.id
+    const { post_title, post_img, post_content, post_upvotes, post_downvotes, postId } = req.body
+
+    const post = getpostByID.get(id)
+
+    if (post) {
+
+        updatePosts.run(post_title ?? post.post_title, post_img ?? post.post_img,
+            post_content ?? post_content, post_upvotes ?? post.post_upvotes, post_downvotes ?? post.post_downvotes, postId ?? post.postId)
+
+        const result = getpostByID.get(id)
+
+        res.send(result)
+    } else {
+        res.status(404).send({ error: 'post not found' })
+    }
+
+})
 
 
 app.delete('/users/:id', (req, res) => {
@@ -269,8 +320,6 @@ app.delete('/comments/:id', (req, res) => {
     const id = req.params.id
     const comment = delteComment.run(id)
 
-
-    console.log({ comment: 'comment' })
 
     if (comment.changes !== 0) {
         res.send({ comment: 'Comment deleted succefully' })
