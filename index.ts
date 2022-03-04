@@ -209,8 +209,6 @@ app.get('/logins', (req, res) => {
 })
 
 
-
-
 app.post('/users', (req, res) => {
     //get the data from body
     const { user_name, user_lastname, user_email, user_age, user_password } = req.body
@@ -234,6 +232,19 @@ app.post('/posts', (req, res) => {
 
     res.send(newPost)
 
+})
+
+app.post(`/comments`, (req, res) => {
+    const { content, upvotes, downvotes, userId, postId } = req.body
+
+    const createcoment = createComents.run(content, upvotes, downvotes, userId, postId)
+
+    if (createcoment) {
+        const comment = getcommentById.get(createcoment.lastInsertRowid)
+        res.send(comment)
+    } else {
+        res.status(404).send({ error: 'comment not found' })
+    }
 })
 
 app.patch('/users/:id', (req, res) => {
